@@ -1,6 +1,7 @@
 const http = require('http');
 const url = require('url');
 const { StringDecoder } = require('string_decoder');
+const handlerRoute = require('./routes');
 
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
@@ -19,7 +20,21 @@ const server = http.createServer((req, res) => {
 
   req.on('end', () => {
     buffer += decoder.end();
-    res.end('Response from vanilla nodejs server\n');
+    let data = {
+      trimedPath,
+      method
+    }
+
+    handlerRoute(trimedPath, (statusCode, payload) => {
+      data = { ...data, statusCode, payload };
+      console.log("data object : ", data);
+      console.log(`Status: ${statusCode} | Payload: ${JSON.stringify(payload)}`);
+    })();
+
+    res.setHeader('Content-type', 'application/json');
+    res.writeHead(data.statusCode);
+    const payload = JSON.stringify(data.payload);
+    res.end(payload);
     console.log(`URL: ${trimedPath} | Method: ${method} | Query: ${JSON.stringify(stringQuery)}`);
     console.log(`Headers: ${JSON.stringify(headers)}`);
     console.log(`Buffer: ${buffer}`);
