@@ -1,14 +1,14 @@
 const http = require('http');
 const url = require('url');
 const { StringDecoder } = require('string_decoder');
-const handlerRoute = require('./routes');
+const router = require('./router');
 
 const server = http.createServer((req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
   const trimedPath = path.replace(/^\/+|\/+$/g, "");
   const method = req.method.toLowerCase();
-  const stringQuery = parsedUrl.query;
+  const query = parsedUrl.query;
   const headers = req.headers;
 
   const decoder = new StringDecoder('utf-8');
@@ -22,20 +22,24 @@ const server = http.createServer((req, res) => {
     buffer += decoder.end();
     let data = {
       trimedPath,
-      method
+      query,
+      method,
+      headers,
+      buffer
     }
 
-    handlerRoute(trimedPath, (statusCode, payload) => {
-      data = { ...data, statusCode, payload };
-      console.log("data object : ", data);
+    router(data, (statusCode, payload) => {
+      statusCode = typeof (statusCode) == 'number' ? statusCode : 200;
+      payload = typeof (payload) == 'object' ? payload : {};
+      // data = { ...data, statusCode, payload };
+      // console.log("data object : ", data);
       console.log(`Status: ${statusCode} | Payload: ${JSON.stringify(payload)}`);
+      res.setHeader('Content-type', 'application/json');
+      res.writeHead(statusCode);
+      const payloadString = JSON.stringify(payload);
+      res.end(payloadString);
     })();
-
-    res.setHeader('Content-type', 'application/json');
-    res.writeHead(data.statusCode);
-    const payload = JSON.stringify(data.payload);
-    res.end(payload);
-    console.log(`URL: ${trimedPath} | Method: ${method} | Query: ${JSON.stringify(stringQuery)}`);
+    console.log(`URL: ${trimedPath} | Method: ${method} | Query: ${JSON.stringify(query)}`);
     console.log(`Headers: ${JSON.stringify(headers)}`);
     console.log(`Buffer: ${buffer}`);
   });
