@@ -8,8 +8,13 @@ const router = require('./router');
 const _dataStore = require('./lib/data');
 
 //@TODO delete
+/*
 _dataStore.create('test', 'testFile', { foo: 'bar' }, err => {
   console.log('Error create file :: ', err);
+});
+*/
+_dataStore.read('test', 'testFile', (err, data) => {
+  console.log(`Error read file :: ${err} | Data :: ${data}`);
 });
 
 const httpServer = http.createServer((req, res) => {
