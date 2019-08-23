@@ -5,24 +5,6 @@ const fs = require('fs');
 const { StringDecoder } = require('string_decoder');
 const config = require('./config');
 const router = require('./router');
-const _dataStore = require('./lib/data');
-
-//@TODO delete
-/*
-_dataStore.create('test', 'testFile', { foo: 'bar' }, err => {
-  console.log('Error create file :: ', err);
-});
-
-
-_dataStore.update('test', 'testFile', { name: 'elPoeta' }, err => {
-  console.log('Error update file :: ', err);
-});
-
-
-_dataStore.read('test', 'testFile', (err, data) => {
-  console.log(`Error read file :: ${err} | Data :: ${data}`);
-});
-*/
 
 const httpServer = http.createServer((req, res) => {
   unifiedServer(req, res);
