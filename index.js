@@ -1,9 +1,34 @@
 const http = require('http');
+const https = require('https');
 const url = require('url');
+const fs = require('fs');
 const { StringDecoder } = require('string_decoder');
+const config = require('./config');
 const router = require('./router');
 
-const server = http.createServer((req, res) => {
+const httpServer = http.createServer((req, res) => {
+  unifiedServer(req, res);
+});
+
+httpServer.listen(config.httpPort, () => {
+  console.log(`Server listen on port ${config.httpPort}`);
+});
+
+const httpsServerOptions = {
+  key: fs.readFileSync('./https/key.pem'),
+  cert: fs.readFileSync('./https/cert.pem')
+}
+
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+  unifiedServer(req, res);
+});
+
+httpsServer.listen(config.httpsPort, () => {
+  console.log(`Server listen on port ${config.httpsPort}`);
+});
+
+
+const unifiedServer = (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
   const trimedPath = path.replace(/^\/+|\/+$/g, "");
@@ -43,10 +68,4 @@ const server = http.createServer((req, res) => {
     console.log(`Headers: ${JSON.stringify(headers)}`);
     console.log(`Buffer: ${buffer}`);
   });
-});
-
-const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, () => {
-  console.log(`Server listen on port ${PORT}`);
-});
+}
