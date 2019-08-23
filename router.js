@@ -1,7 +1,7 @@
 module.exports = (data, callback) => {
 
-  const handlerSample = () => {
-    callback(200, { name: 'Sample Handler' });
+  const handlerPing = () => {
+    callback(200);
   }
 
   const handlerNotFound = () => {
@@ -9,7 +9,7 @@ module.exports = (data, callback) => {
   }
 
   const router = {
-    'sample': handlerSample,
+    'ping': handlerPing,
     'default': handlerNotFound
   }
 
