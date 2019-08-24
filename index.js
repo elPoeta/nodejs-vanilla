@@ -45,6 +45,7 @@ const unifiedServer = (req, res) => {
 
   req.on('end', () => {
     buffer += decoder.end();
+    console.log('bodyparser :: ', JSON.parse(buffer));
     let data = {
       trimedPath,
       query,

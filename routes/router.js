@@ -10,8 +10,6 @@ module.exports = (data, callback) => {
     callback(404);
   }
 
-
-
   const router = {
     'ping': handlerPing,
     'user': handlerUser(data, callback),

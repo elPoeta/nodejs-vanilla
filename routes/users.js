@@ -1,3 +1,5 @@
+const dataStore = require('../lib/data');
+
 module.exports = (data, callback) => {
   const methods = ['get', 'post', 'put', 'delete'];
   const method = methods.indexOf(data.method) > -1 ? data.method : 'default';
@@ -7,7 +9,15 @@ module.exports = (data, callback) => {
   }
 
   const userPost = () => {
-    callback(200, { postU: 'CREATE OK' });
+    const ds = JSON.parse(data.buffer)
+    dataStore.create('users', ds.user, ds, err => {
+      if (err) {
+        callback(403, { error: err });
+        return;
+      }
+      callback(200, { postU: 'CREATE FILE OK' });
+    });
+
   }
 
   const userPut = () => {
