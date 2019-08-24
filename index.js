@@ -3,8 +3,9 @@ const https = require('https');
 const url = require('url');
 const fs = require('fs');
 const { StringDecoder } = require('string_decoder');
-const config = require('./config');
+const config = require('./config/config');
 const router = require('./routes/router');
+const { parseJsonObject } = require('./lib/helpers');
 
 const httpServer = http.createServer((req, res) => {
   unifiedServer(req, res);
@@ -51,7 +52,7 @@ const unifiedServer = (req, res) => {
       query,
       method,
       headers,
-      buffer
+      payload: parseJsonObject(buffer)
     }
 
     router(data, (statusCode, payload) => {
