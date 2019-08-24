@@ -4,7 +4,7 @@ const url = require('url');
 const fs = require('fs');
 const { StringDecoder } = require('string_decoder');
 const config = require('./config');
-const router = require('./router');
+const router = require('./routes/router');
 
 const httpServer = http.createServer((req, res) => {
   unifiedServer(req, res);

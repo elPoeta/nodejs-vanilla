@@ -1,3 +1,5 @@
+const handlerUser = require('./users');
+
 module.exports = (data, callback) => {
 
   const handlerPing = () => {
@@ -8,8 +10,11 @@ module.exports = (data, callback) => {
     callback(404);
   }
 
+
+
   const router = {
     'ping': handlerPing,
+    'user': handlerUser(data, callback),
     'default': handlerNotFound
   }
 
