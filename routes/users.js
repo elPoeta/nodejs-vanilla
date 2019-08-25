@@ -13,7 +13,7 @@ module.exports = (data, callback) => {
     }
     dataStore.read('users', phone, (err, data) => {
       if (err) {
-        callback(403, { error: 'Error to read user data' });
+        callback(403, { error: 'Error user not found' });
         return;
       }
       delete data.password;
@@ -101,7 +101,24 @@ module.exports = (data, callback) => {
   }
 
   const userDelete = () => {
-    callback(200, { delU: 'DELETE OK' });
+    const phone = !isEmpty(data.query.phone) ? data.query.phone.trim() : false;
+    if (!phone) {
+      callback(400, { error: 'Error missing phone number' });
+      return;
+    }
+    dataStore.read('users', phone, (err, data) => {
+      if (err) {
+        callback(403, { error: 'Error user not found' });
+        return;
+      }
+      dataStore.delete('users', phone, err => {
+        if (err) {
+          callback(500, { error: 'Could not delete the user' });
+        }
+        callback(200, { ok: 'The user was deleted' });
+      });
+
+    });
   }
 
   const invalidMethod = () => {
