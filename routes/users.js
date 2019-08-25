@@ -24,6 +24,7 @@ module.exports = (data, callback) => {
 
   const userPost = () => {
     const { name, email, phone, password, toAgreement } = data.payload;
+
     if (!toAgreement || isEmpty(name) || isEmpty(email) || isEmpty(password) || isEmpty(phone)) {
       callback(500, { error: "One or more fields are empty" });
       return;
@@ -59,7 +60,44 @@ module.exports = (data, callback) => {
   }
 
   const userPut = () => {
-    callback(200, { putU: 'UPDATE OK' });
+    const { name, email, phone, password } = data.payload;
+    const isPhone = !isEmpty(phone) ? phone.trim() : false;
+    if (!isPhone) {
+      callback(400, { error: 'Error missing phone number' });
+      return;
+    }
+    dataStore.read('users', phone, (err, data) => {
+      if (err) {
+        callback(403, { error: 'User not found' });
+        return;
+      }
+      const userData = data;
+      if (name || email || password) {
+        if (name) {
+          userData.name = name;
+        }
+        if (email) {
+          userData.email = email
+        }
+        if (password) {
+          const hashedPassword = hashPassword(password);
+          if (!hashedPassword) {
+            callback(500, { error: "Could not hash the password" });
+            return;
+          }
+          userData.password = hashedPassword;
+        }
+        dataStore.update('users', isPhone, userData, err => {
+          if (err) {
+            callback(500, { error: "Error to update user" });
+          }
+          callback(200, userData);
+        });
+      } else {
+        callback(200);
+      }
+    });
+
   }
 
   const userDelete = () => {
