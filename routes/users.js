@@ -6,13 +6,20 @@ module.exports = (data, callback) => {
   const method = methods.indexOf(data.method) > -1 ? data.method : 'default';
 
   const userGet = () => {
-    callback(200, { getU: 'READ OK' });
+    const phone = data.query.phone;
+    dataStore.read('users', phone, (err, data) => {
+      if (err) {
+        callback(403, { error: 'Error to read user data' });
+        return;
+      }
+      callback(200, data);
+    });
+
   }
 
   const userPost = () => {
     const { name, email, phone, password, toAgreement } = data.payload;
-
-    if (isEmpty(name) || isEmpty(email) || isEmpty(password) || isEmpty(phone)) {
+    if (!toAgreement || isEmpty(name) || isEmpty(email) || isEmpty(password) || isEmpty(phone)) {
       callback(500, { error: "One or more fields are empty" });
       return;
     }
