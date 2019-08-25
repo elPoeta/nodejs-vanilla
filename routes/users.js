@@ -6,12 +6,17 @@ module.exports = (data, callback) => {
   const method = methods.indexOf(data.method) > -1 ? data.method : 'default';
 
   const userGet = () => {
-    const phone = data.query.phone;
+    const phone = !isEmpty(data.query.phone) ? data.query.phone.trim() : false;
+    if (!phone) {
+      callback(400, { error: 'Error missing phone number' });
+      return;
+    }
     dataStore.read('users', phone, (err, data) => {
       if (err) {
         callback(403, { error: 'Error to read user data' });
         return;
       }
+      delete data.password;
       callback(200, data);
     });
 
