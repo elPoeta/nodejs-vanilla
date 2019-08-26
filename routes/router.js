@@ -1,4 +1,5 @@
 const handlerUser = require('./users');
+const handdlerToken = require('./tokens');
 
 module.exports = (data, callback) => {
 
@@ -12,7 +13,8 @@ module.exports = (data, callback) => {
 
   const router = {
     'ping': handlerPing,
-    'user': handlerUser(data, callback),
+    'api/user': handlerUser(data, callback),
+    'api/token': handdlerToken(data, callback),
     'default': handlerNotFound
   }
 
