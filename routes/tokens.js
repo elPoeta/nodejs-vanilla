@@ -1,16 +1,27 @@
 const dataStore = require('../lib/data');
-const { hashPassword, createRandomString } = require('../lib/helpers');
+const { hashPassword, createRandomString, isEmpty } = require('../lib/helpers');
 
 module.exports = (data, callback) => {
   const methods = ['get', 'post', 'put', 'delete'];
   const method = methods.indexOf(data.method) > -1 ? data.method : 'default';
 
   const tokenGet = () => {
-    callback(200, { ok: 'Get token' });
+    const tokenId = !isEmpty(data.query.tokenId) ? data.query.tokenId.trim() : false;
+    if (!tokenId) {
+      callback(403, { error: "Missing token" });
+      return;
+    }
+
+    dataStore.read('tokens', tokenId.trim(), (err, dataToken) => {
+      if (err) {
+        callback(500, { error: "Token not found" });
+        return;
+      }
+      callback(200, dataToken);
+    });
   }
 
   const tokenPost = () => {
-    console.log('tokenPost')
     const { phone, password } = data.payload;
     dataStore.read('users', phone.trim(), (err, userData) => {
       if (err) {
