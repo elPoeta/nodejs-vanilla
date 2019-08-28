@@ -62,7 +62,6 @@ module.exports = (data, callback) => {
       ? data.payload.tokenId.trim()
       : false;
     const extend = typeof data.payload.extend == 'boolean' ? data.payload.extend : false;
-    console.log("token id ", tokenId);
     if (!tokenId || !extend) {
       callback(403, { error: "Missing fields" });
       return;
@@ -82,7 +81,6 @@ module.exports = (data, callback) => {
 
       dataStore.update('tokens', tokenId, dataToken, err => {
         if (err) {
-          console.log("ERR :: ", err)
           callback(500, { error: 'Error to update Token' });
           return;
         }

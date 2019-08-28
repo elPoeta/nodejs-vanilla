@@ -11,15 +11,26 @@ module.exports = (data, callback) => {
       callback(400, { error: 'Error missing phone number' });
       return;
     }
+    const tokenHeader = typeof data.headers.token == 'string' ? data.headers.token : false;
+    if (!tokenHeader) {
+      callback(404, { error: 'Missing Token' });
+      return;
+    }
+
     dataStore.read('users', phone, (err, data) => {
       if (err) {
-        callback(403, { error: 'Error user not found' });
+        callback(404, { error: 'Error user not found' });
         return;
       }
-      delete data.password;
-      callback(200, data);
+      verifyToken(tokenHeader, phone, isValidToken => {
+        if (!isValidToken) {
+          callback(403, { error: 'Invalid user token' });
+          return;
+        }
+        delete data.password;
+        callback(200, data);
+      });
     });
-
   }
 
   const userPost = () => {
@@ -118,6 +129,21 @@ module.exports = (data, callback) => {
         callback(200, { ok: 'The user was deleted' });
       });
 
+    });
+  }
+
+  const verifyToken = (tokenId, phone, callback) => {
+    dataStore.read('tokens', tokenId, (err, dataToken) => {
+      if (err) {
+        callback(false);
+        return;
+      }
+
+      if (phone != dataToken.phone && dataToken.expires < Date.now()) {
+        callback(false);
+        return;
+      }
+      callback(true);
     });
   }
 
