@@ -94,8 +94,24 @@ module.exports = (data, callback) => {
   }
 
   const tokenDelete = () => {
-    callback(200, { ok: 'Delete token' });
+    const { tokenId } = data.query;
+    const id = typeof tokenId == 'string'
+      && tokenId.trim().length == 20
+      ? tokenId.trim()
+      : false;
 
+    if (!id) {
+      callback(404, { error: 'Missing fields' });
+      return;
+    }
+
+    dataStore.delete('tokens', id, err => {
+      if (err) {
+        callback(404, { error: 'error to delete file' });
+        return;
+      }
+      callback(200, { ok: 'The file was deleted' });
+    });
   }
 
   const invalidMethod = () => {
