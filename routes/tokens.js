@@ -11,7 +11,6 @@ module.exports = (data, callback) => {
       callback(403, { error: "Missing token" });
       return;
     }
-
     dataStore.read('tokens', tokenId.trim(), (err, dataToken) => {
       if (err) {
         callback(500, { error: "Token not found" });

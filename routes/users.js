@@ -1,5 +1,5 @@
 const dataStore = require('../lib/data');
-const { isEmpty, hashPassword } = require('../lib/helpers');
+const { isEmpty, hashPassword, verifyToken } = require('../lib/helpers');
 
 module.exports = (data, callback) => {
   const methods = ['get', 'post', 'put', 'delete'];
