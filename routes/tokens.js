@@ -58,8 +58,39 @@ module.exports = (data, callback) => {
   }
 
   const tokenPut = () => {
-    callback(200, { ok: 'Put token' });
+    const tokenId = typeof data.payload.tokenId == 'string'
+      && data.payload.tokenId.trim().length == 20
+      ? data.payload.tokenId.trim()
+      : false;
+    const extend = typeof data.payload.extend == 'boolean' ? data.payload.extend : false;
+    console.log("token id ", tokenId);
+    if (!tokenId || !extend) {
+      callback(403, { error: "Missing fields" });
+      return;
+    }
 
+    dataStore.read('tokens', tokenId, (err, dataToken) => {
+      if (err) {
+        callback(404, { error: "Token not found" });
+        return;
+      }
+
+      if (dataToken.expires < Date.now()) {
+        callback(404, { error: "Token expired" });
+        return;
+      }
+      dataToken.expires = Date.now() + 1000 * 60 * 60;
+
+      dataStore.update('tokens', tokenId, dataToken, err => {
+        if (err) {
+          console.log("ERR :: ", err)
+          callback(500, { error: 'Error to update Token' });
+          return;
+        }
+
+        callback(200, { ok: 'Token was updated' });
+      });
+    });
   }
 
   const tokenDelete = () => {
