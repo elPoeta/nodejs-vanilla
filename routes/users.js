@@ -42,7 +42,6 @@ module.exports = (data, callback) => {
     }
 
     const hashedPassword = hashPassword(password);
-    console.log('hash :: ', hashedPassword);
     if (!hashedPassword) {
       callback(500, { error: "Could not hash the password" });
       return;
@@ -77,36 +76,49 @@ module.exports = (data, callback) => {
       callback(400, { error: 'Error missing phone number' });
       return;
     }
+
+    const tokenHeader = typeof data.headers.token == 'string' ? data.headers.token : false;
+    if (!tokenHeader) {
+      callback(404, { error: 'Missing Token' });
+      return;
+    }
+
     dataStore.read('users', phone, (err, data) => {
       if (err) {
         callback(403, { error: 'User not found' });
         return;
       }
-      const userData = data;
-      if (name || email || password) {
-        if (name) {
-          userData.name = name;
+      verifyToken(tokenHeader, phone, isValidToken => {
+        if (!isValidToken) {
+          callback(403, { error: 'Invalid user token' });
+          return;
         }
-        if (email) {
-          userData.email = email
-        }
-        if (password) {
-          const hashedPassword = hashPassword(password);
-          if (!hashedPassword) {
-            callback(500, { error: "Could not hash the password" });
-            return;
+        const userData = data;
+        if (name || email || password) {
+          if (name) {
+            userData.name = name;
           }
-          userData.password = hashedPassword;
-        }
-        dataStore.update('users', isPhone, userData, err => {
-          if (err) {
-            callback(500, { error: "Error to update user" });
+          if (email) {
+            userData.email = email
           }
-          callback(200, userData);
-        });
-      } else {
-        callback(200);
-      }
+          if (password) {
+            const hashedPassword = hashPassword(password);
+            if (!hashedPassword) {
+              callback(500, { error: "Could not hash the password" });
+              return;
+            }
+            userData.password = hashedPassword;
+          }
+          dataStore.update('users', isPhone, userData, err => {
+            if (err) {
+              callback(500, { error: "Error to update user" });
+            }
+            callback(200, userData);
+          });
+        } else {
+          callback(200);
+        }
+      });
     });
 
   }
@@ -117,18 +129,30 @@ module.exports = (data, callback) => {
       callback(400, { error: 'Error missing phone number' });
       return;
     }
+
+    const tokenHeader = typeof data.headers.token == 'string' ? data.headers.token : false;
+    if (!tokenHeader) {
+      callback(404, { error: 'Missing Token' });
+      return;
+    }
+
     dataStore.read('users', phone, (err, data) => {
       if (err) {
         callback(403, { error: 'Error user not found' });
         return;
       }
-      dataStore.delete('users', phone, err => {
-        if (err) {
-          callback(500, { error: 'Could not delete the user' });
+      verifyToken(tokenHeader, phone, isValidToken => {
+        if (!isValidToken) {
+          callback(403, { error: 'Invalid user token' });
+          return;
         }
-        callback(200, { ok: 'The user was deleted' });
+        dataStore.delete('users', phone, err => {
+          if (err) {
+            callback(500, { error: 'Could not delete the user' });
+          }
+          callback(200, { ok: 'The user was deleted' });
+        });
       });
-
     });
   }
 
